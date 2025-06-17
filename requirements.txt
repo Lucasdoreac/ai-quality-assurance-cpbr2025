@@ -73,4 +73,3 @@ toml==0.10.2
 # Auto-Documentation System Dependencies
 watchdog==3.0.0
 GitPython==3.1.40
-jinja2==3.1.2
