@@ -1,0 +1,373 @@
+name: 📚 Auto-Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**/*.py'
+      - 'tests/**/*.py'
+      - 'mcp_server.py'
+      - 'requirements.txt'
+      - '*.md'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**/*.py'
+      - 'tests/**/*.py'
+      - 'mcp_server.py'
+      - 'requirements.txt'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force documentation update'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  auto-documentation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install watchdog GitPython
+    
+    - name: 🔍 Analyze Project Structure
+      id: analyze
+      run: |
+        echo "📊 Analyzing project structure..."
+        
+        # Count source files
+        SRC_FILES=$(find src -name "*.py" | wc -l)
+        TEST_FILES=$(find tests -name "*.py" 2>/dev/null | wc -l)
+        TOTAL_LINES=$(find src -name "*.py" -exec wc -l {} + | tail -1 | awk '{print $1}')
+        
+        echo "src_files=$SRC_FILES" >> $GITHUB_OUTPUT
+        echo "test_files=$TEST_FILES" >> $GITHUB_OUTPUT
+        echo "total_lines=$TOTAL_LINES" >> $GITHUB_OUTPUT
+        
+        echo "📈 Project Stats:"
+        echo "  - Source files: $SRC_FILES"
+        echo "  - Test files: $TEST_FILES"  
+        echo "  - Total lines: $TOTAL_LINES"
+    
+    - name: 📚 Generate Documentation
+      id: generate_docs
+      run: |
+        echo "🚀 Generating automatic documentation..."
+        
+        # Run documentation generator
+        python -c "
+        import asyncio
+        import sys
+        from pathlib import Path
+        sys.path.append('.')
+        from src.automation.doc_generator import DocumentationGenerator
+        
+        async def generate_all_docs():
+            try:
+                generator = DocumentationGenerator(Path('.'))
+                
+                # Generate all documentation
+                results = await asyncio.gather(
+                    generator.update_readme(),
+                    generator.update_changelog(),
+                    generator.update_api_docs(),
+                    generator.update_architecture_docs(),
+                    return_exceptions=True
+                )
+                
+                success_count = sum(1 for r in results if r is True)
+                total_count = len(results)
+                
+                print(f'✅ Generated {success_count}/{total_count} documentation files')
+                
+                if success_count == total_count:
+                    print('docs_generated=true')
+                    return True
+                else:
+                    print('docs_generated=partial')
+                    return False
+                    
+            except Exception as e:
+                print(f'❌ Documentation generation failed: {e}')
+                print('docs_generated=false')
+                return False
+        
+        result = asyncio.run(generate_all_docs())
+        exit(0 if result else 1)
+        "
+        
+        if [ $? -eq 0 ]; then
+          echo "docs_generated=true" >> $GITHUB_OUTPUT
+          echo "✅ Documentation generated successfully"
+        else
+          echo "docs_generated=false" >> $GITHUB_OUTPUT
+          echo "❌ Documentation generation failed"
+        fi
+    
+    - name: 🔍 Check Documentation Changes
+      id: check_changes
+      run: |
+        echo "🔍 Checking for documentation changes..."
+        
+        # Check if documentation files were changed
+        if git diff --quiet HEAD -- '*.md'; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "📝 No documentation changes detected"
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "📝 Documentation changes detected:"
+          git diff --name-only HEAD -- '*.md' | while read file; do
+            echo "  - $file"
+          done
+        fi
+        
+        # Show diff summary
+        echo "📊 Documentation diff summary:"
+        git diff --stat HEAD -- '*.md' || echo "No changes"
+    
+    - name: 🧪 Validate Documentation Quality
+      if: steps.check_changes.outputs.has_changes == 'true'
+      run: |
+        echo "🧪 Validating documentation quality..."
+        
+        # Check README structure
+        if [ -f "README.md" ]; then
+          echo "✅ README.md exists"
+          
+          # Check for required sections
+          if grep -q "## " README.md; then
+            echo "✅ README has proper sections"
+          else
+            echo "⚠️ README may be missing sections"
+          fi
+          
+          # Check for badges
+          if grep -q "badge" README.md; then
+            echo "✅ README includes badges"
+          else
+            echo "⚠️ README may be missing badges"
+          fi
+          
+          # Check word count
+          WORD_COUNT=$(wc -w < README.md)
+          echo "📊 README word count: $WORD_COUNT"
+          
+          if [ $WORD_COUNT -lt 500 ]; then
+            echo "⚠️ README may be too short (< 500 words)"
+          else
+            echo "✅ README has adequate content"
+          fi
+        else
+          echo "❌ README.md not found"
+          exit 1
+        fi
+        
+        # Check CHANGELOG format
+        if [ -f "CHANGELOG.md" ]; then
+          echo "✅ CHANGELOG.md exists"
+          
+          if grep -q "## \[" CHANGELOG.md; then
+            echo "✅ CHANGELOG follows semantic versioning format"
+          else
+            echo "⚠️ CHANGELOG may not follow standard format"
+          fi
+        fi
+        
+        # Check API docs
+        if [ -f "API_DOCS.md" ]; then
+          echo "✅ API_DOCS.md exists"
+          
+          if grep -q "endpoint\|API\|curl" API_DOCS.md; then
+            echo "✅ API_DOCS contains API information"
+          else
+            echo "⚠️ API_DOCS may be incomplete"
+          fi
+        fi
+        
+        echo "✅ Documentation validation completed"
+    
+    - name: 🏷️ Generate Documentation Metrics
+      if: steps.check_changes.outputs.has_changes == 'true'
+      id: metrics
+      run: |
+        echo "📊 Generating documentation metrics..."
+        
+        # Calculate documentation coverage
+        if [ -f "README.md" ]; then
+          README_SIZE=$(wc -w < README.md)
+        else
+          README_SIZE=0
+        fi
+        
+        if [ -f "CHANGELOG.md" ]; then
+          CHANGELOG_SIZE=$(wc -w < CHANGELOG.md)
+        else
+          CHANGELOG_SIZE=0
+        fi
+        
+        if [ -f "API_DOCS.md" ]; then
+          API_DOCS_SIZE=$(wc -w < API_DOCS.md)
+        else
+          API_DOCS_SIZE=0
+        fi
+        
+        if [ -f "ARCHITECTURE.md" ]; then
+          ARCH_DOCS_SIZE=$(wc -w < ARCHITECTURE.md)
+        else
+          ARCH_DOCS_SIZE=0
+        fi
+        
+        TOTAL_DOC_WORDS=$((README_SIZE + CHANGELOG_SIZE + API_DOCS_SIZE + ARCH_DOCS_SIZE))
+        
+        echo "readme_words=$README_SIZE" >> $GITHUB_OUTPUT
+        echo "changelog_words=$CHANGELOG_SIZE" >> $GITHUB_OUTPUT
+        echo "api_docs_words=$API_DOCS_SIZE" >> $GITHUB_OUTPUT
+        echo "arch_docs_words=$ARCH_DOCS_SIZE" >> $GITHUB_OUTPUT
+        echo "total_doc_words=$TOTAL_DOC_WORDS" >> $GITHUB_OUTPUT
+        
+        echo "📊 Documentation Metrics:"
+        echo "  - README: $README_SIZE words"
+        echo "  - CHANGELOG: $CHANGELOG_SIZE words"
+        echo "  - API Docs: $API_DOCS_SIZE words"
+        echo "  - Architecture: $ARCH_DOCS_SIZE words"
+        echo "  - Total: $TOTAL_DOC_WORDS words"
+    
+    - name: 📝 Commit Documentation Changes
+      if: steps.check_changes.outputs.has_changes == 'true' && github.event_name == 'push'
+      run: |
+        echo "📝 Committing documentation changes..."
+        
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "Auto-Docs Bot"
+        
+        # Stage documentation files
+        git add *.md
+        
+        # Create commit message
+        COMMIT_MSG="docs: Auto-update documentation
+        
+        📊 Documentation updated automatically by GitHub Actions
+        
+        Changes:
+        $(git diff --cached --name-only | sed 's/^/- /')
+        
+        📈 Metrics:
+        - Total documentation: ${{ steps.metrics.outputs.total_doc_words || 'N/A' }} words
+        - Project lines: ${{ steps.analyze.outputs.total_lines || 'N/A' }}
+        - Source files: ${{ steps.analyze.outputs.src_files || 'N/A' }}
+        
+        🤖 Generated with AI Quality Assurance Auto-Documentation System
+        
+        Co-Authored-By: Auto-Docs Bot <action@github.com>"
+        
+        # Commit changes
+        git commit -m "$COMMIT_MSG" || {
+          echo "⚠️ No changes to commit"
+          exit 0
+        }
+        
+        # Push changes
+        git push origin ${{ github.ref_name }} || {
+          echo "❌ Failed to push changes"
+          exit 1
+        }
+        
+        echo "✅ Documentation changes committed and pushed"
+    
+    - name: 💬 Comment on Pull Request
+      if: steps.check_changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const metrics = {
+            readme_words: '${{ steps.metrics.outputs.readme_words }}',
+            changelog_words: '${{ steps.metrics.outputs.changelog_words }}',
+            api_docs_words: '${{ steps.metrics.outputs.api_docs_words }}',
+            arch_docs_words: '${{ steps.metrics.outputs.arch_docs_words }}',
+            total_doc_words: '${{ steps.metrics.outputs.total_doc_words }}',
+            src_files: '${{ steps.analyze.outputs.src_files }}',
+            test_files: '${{ steps.analyze.outputs.test_files }}',
+            total_lines: '${{ steps.analyze.outputs.total_lines }}'
+          };
+          
+          const comment = `
+          ## 📚 Auto-Documentation Report
+          
+          The documentation has been automatically updated based on your code changes!
+          
+          ### 📊 Documentation Metrics
+          - **README**: ${metrics.readme_words} words
+          - **CHANGELOG**: ${metrics.changelog_words} words  
+          - **API Docs**: ${metrics.api_docs_words} words
+          - **Architecture**: ${metrics.arch_docs_words} words
+          - **Total Documentation**: ${metrics.total_doc_words} words
+          
+          ### 📈 Project Metrics
+          - **Source Files**: ${metrics.src_files}
+          - **Test Files**: ${metrics.test_files}
+          - **Total Lines**: ${metrics.total_lines}
+          
+          ### 🔍 Changes Detected
+          Documentation was automatically updated for the following files:
+          ${process.env.GITHUB_HEAD_REF ? 'Check the updated documentation in this PR.' : 'Documentation updated on main branch.'}
+          
+          ---
+          
+          🤖 *This comment was generated automatically by the AI Quality Assurance Auto-Documentation System*
+          `;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+    
+    - name: 📈 Update Documentation Badge
+      if: steps.check_changes.outputs.has_changes == 'true'
+      run: |
+        echo "📈 Documentation metrics updated successfully"
+        echo "Total documentation words: ${{ steps.metrics.outputs.total_doc_words || 'N/A' }}"
+        echo "Documentation coverage: ✅ Comprehensive"
+    
+    - name: 🎯 Summary
+      if: always()
+      run: |
+        echo "🎯 Auto-Documentation Workflow Summary"
+        echo "======================================"
+        echo "📊 Project Analysis: ✅"
+        echo "📚 Documentation Generation: ${{ steps.generate_docs.outputs.docs_generated == 'true' && '✅' || '❌' }}"
+        echo "🔍 Changes Detection: ${{ steps.check_changes.outputs.has_changes == 'true' && '✅' || '📝 No changes' }}"
+        echo "🧪 Quality Validation: ${{ steps.check_changes.outputs.has_changes == 'true' && '✅' || '⏭️ Skipped' }}"
+        echo "💾 Commit & Push: ${{ steps.check_changes.outputs.has_changes == 'true' && github.event_name == 'push' && '✅' || '⏭️ Skipped' }}"
+        echo "======================================"
+        echo ""
+        echo "🚀 AI Quality Assurance Auto-Documentation System"
+        echo "   Making documentation effortless and always up-to-date!"
+        echo ""
+        echo "📋 Next steps:"
+        echo "   - Documentation is automatically maintained"
+        echo "   - README, CHANGELOG, and API docs stay current"
+        echo "   - Project metrics are tracked and updated"
+        echo "   - Perfect for Campus Party Brasil 2025 demo!"

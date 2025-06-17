@@ -1,0 +1,312 @@
+# AI Quality Assurance Auto-Documentation Configuration
+# Configuration file for the automatic documentation system
+
+# Project Information
+project:
+  name: "AI Quality Assurance System"
+  description: "Real AI-powered code analysis for quality assurance"
+  author: "Aulus Diniz"
+  license: "MIT"
+  python_version: "3.11+"
+  main_entry_point: "src/main.py"
+  mcp_server: "mcp_server.py"
+
+# File Monitoring Configuration
+file_watcher:
+  # Debounce interval (seconds) - prevent excessive updates
+  debounce_interval: 2.0
+  
+  # File patterns to watch for changes
+  watch_patterns:
+    source_code:
+      - "src/**/*.py"
+      - "*.py"
+    tests:
+      - "tests/**/*.py"
+      - "test_*.py"
+      - "*_test.py"
+    documentation:
+      - "*.md"
+      - "*.rst"
+      - "docs/**/*"
+    configuration:
+      - "*.yaml"
+      - "*.yml" 
+      - "*.json"
+      - "*.toml"
+      - "requirements.txt"
+      - "pyproject.toml"
+    workflows:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+  
+  # Patterns to ignore
+  ignore_patterns:
+    - "__pycache__/**"
+    - "*.pyc"
+    - "*.pyo"
+    - ".git/**"
+    - ".venv/**"
+    - "venv/**"
+    - "env/**"
+    - "*.tmp"
+    - "*.swp"
+    - "*.bak"
+    - ".DS_Store"
+    - "node_modules/**"
+    - "*.log"
+
+# Documentation Generation Configuration
+documentation:
+  # Types of documentation to generate
+  targets:
+    - "README.md"
+    - "CHANGELOG.md"
+    - "API_DOCS.md"
+    - "ARCHITECTURE.md"
+    - "INSTALLATION.md"
+  
+  # Documentation style and formatting
+  style:
+    format: "modern"
+    include_badges: true
+    include_toc: true
+    include_installation: true
+    include_examples: true
+    include_architecture: true
+    include_metrics: true
+    include_screenshots: false
+    
+  # Badges configuration
+  badges:
+    python: true
+    fastapi: true
+    scikit_learn: true
+    mcp: true
+    auto_docs: true
+    license: true
+    
+  # Content configuration
+  content:
+    max_changelog_entries: 50
+    include_code_examples: true
+    include_api_endpoints: true
+    include_mcp_tools: true
+    include_performance_metrics: true
+    include_architecture_diagrams: false
+    
+  # Template configuration
+  templates:
+    readme_template: "templates/README.md.j2"
+    changelog_template: "templates/CHANGELOG.md.j2"
+    api_docs_template: "templates/API_DOCS.md.j2"
+
+# Git Integration Configuration
+git:
+  # Auto-commit settings
+  auto_commit: false
+  auto_push: false
+  
+  # Commit configuration
+  commit:
+    message_template: "docs: Auto-update documentation for {file}"
+    author_name: "Auto-Docs Bot"
+    author_email: "auto-docs@ai-qa-system.local"
+    include_metrics: true
+    
+  # Branch configuration
+  branch:
+    main_branch: "main"
+    create_docs_branch: false
+    docs_branch_name: "auto-docs"
+    
+  # Hook configuration
+  hooks:
+    install_on_start: true
+    hook_types:
+      - "pre-commit"
+      - "post-commit"
+      - "pre-push"
+    backup_existing: true
+    
+  # Frequency limits
+  limits:
+    max_commit_frequency: 300  # seconds between auto-commits
+    batch_updates: true
+    max_batch_size: 10
+
+# MCP Server Configuration
+mcp:
+  # Server settings
+  server_name: "ai-qa-system"
+  
+  # Auto-documentation tools
+  tools:
+    update_documentation:
+      enabled: true
+      description: "Force update all project documentation"
+    start_auto_docs:
+      enabled: true
+      description: "Start automatic documentation monitoring"
+    stop_auto_docs:
+      enabled: true
+      description: "Stop automatic documentation monitoring"
+    get_docs_status:
+      enabled: true
+      description: "Get documentation status and metrics"
+    install_git_hooks:
+      enabled: true
+      description: "Install Git hooks for automation"
+    generate_project_report:
+      enabled: true
+      description: "Generate comprehensive project report"
+
+# Performance Configuration
+performance:
+  # File processing limits
+  max_file_size: 10485760  # 10MB
+  max_files_per_update: 100
+  
+  # Processing timeouts
+  analysis_timeout: 30  # seconds
+  documentation_timeout: 60  # seconds
+  git_timeout: 30  # seconds
+  
+  # Caching
+  enable_caching: true
+  cache_duration: 3600  # seconds
+  
+  # Parallel processing
+  max_workers: 4
+  batch_processing: true
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/auto_docs.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+  
+  # Component-specific logging
+  components:
+    file_watcher: "INFO"
+    doc_generator: "INFO"
+    git_integration: "INFO"
+    mcp_server: "INFO"
+
+# Notification Configuration
+notifications:
+  enabled: true
+  
+  # Notification types
+  types:
+    documentation_updated: true
+    errors: true
+    git_operations: true
+    performance_warnings: true
+    
+  # Notification methods
+  methods:
+    console: true
+    file: true
+    webhook: false
+    
+  # Webhook configuration (if enabled)
+  webhook:
+    url: ""
+    headers: {}
+    timeout: 10
+
+# Quality Assurance Configuration
+quality:
+  # Documentation quality checks
+  checks:
+    min_readme_words: 500
+    require_badges: true
+    require_installation: true
+    require_examples: true
+    require_changelog: true
+    require_api_docs: true
+    
+  # Validation rules
+  validation:
+    check_links: false
+    check_spelling: false
+    check_grammar: false
+    validate_markdown: true
+    
+  # Metrics thresholds
+  thresholds:
+    documentation_coverage: 80  # percentage
+    outdated_docs_warning: 7  # days
+    max_doc_staleness: 30  # days
+
+# Development Configuration
+development:
+  # Debug settings
+  debug_mode: false
+  verbose_logging: false
+  
+  # Testing settings
+  test_mode: false
+  mock_git_operations: false
+  
+  # Development helpers
+  auto_reload: true
+  watch_config: true
+  
+# Campus Party Brasil 2025 Demo Configuration
+demo:
+  # Demo-specific settings
+  enabled: true
+  
+  # Demo features
+  features:
+    real_time_updates: true
+    live_metrics: true
+    interactive_examples: true
+    performance_showcase: true
+    
+  # Demo content
+  content:
+    include_campus_party_branding: true
+    include_performance_metrics: true
+    include_roi_calculations: true
+    show_before_after: true
+    
+  # Demo automation
+  automation:
+    auto_start_on_demo: true
+    demo_data_generation: true
+    showcase_all_features: true
+
+# Environment-specific Overrides
+environments:
+  development:
+    git:
+      auto_commit: false
+      auto_push: false
+    logging:
+      level: "DEBUG"
+    performance:
+      max_workers: 2
+      
+  production:
+    git:
+      auto_commit: true
+      auto_push: false
+    logging:
+      level: "INFO"
+    performance:
+      max_workers: 4
+      
+  demo:
+    git:
+      auto_commit: false
+      auto_push: false
+    notifications:
+      enabled: true
+    demo:
+      enabled: true
+      auto_start_on_demo: true
