@@ -42,13 +42,23 @@ def aguardar_enter(mensagem: str = "Pressione ENTER para continuar..."):
 
 
 async def demo_analise_codigo():
-    """Demonstra análise de código."""
-    print_section("DEMONSTRAÇÃO: ANÁLISE INTELIGENTE DE CÓDIGO")
+    """Demonstra análise de código com sistema subagetic."""
+    print_section("DEMONSTRAÇÃO: ANÁLISE INTELIGENTE COM SISTEMA SUBAGETIC")
     
-    # Importar módulos necessários
+    # Importar módulos atualizados
+    from src.automation.documentation_orchestrator import DocumentationOrchestrator
+    from src.automation.subagetic_orchestrator import SubageticOrchestrator, enhance_documentation_with_subagetic
     from src.application.use_cases import AnalyzeCodeUseCase
     from src.infrastructure.repositories import InMemoryCodeAnalysisRepository
+    from pathlib import Path
     
+    print("🤖 Inicializando Sistema Subagetic Multi-Agent...")
+    
+    # Sistema subagetic para análise aprimorada
+    subagetic = SubageticOrchestrator()
+    orchestrator = DocumentationOrchestrator(Path('.'))
+    
+    # Sistema tradicional para comparação
     repository = InMemoryCodeAnalysisRepository()
     use_case = AnalyzeCodeUseCase(repository)
     
@@ -93,15 +103,29 @@ def processar_numeros(numeros: List[int]) -> List[int]:
     return resultado
 '''
     
-    print("📝 Analisando código limpo...")
+    print("📝 Analisando código limpo com Sistema Subagetic...")
+    
+    # Análise tradicional
     resultado_bom = await use_case.execute("codigo_bom.py", codigo_bom)
     
-    print(f"✅ RESULTADO - Código Limpo:")
-    print(f"   📊 Score de Qualidade: {resultado_bom.overall_quality_score:.1f}/100")
+    # Análise com sistema subagetic
+    print("🤖 Executando análise Subagetic Multi-Agent...")
+    subagetic_task = {
+        'type': 'code_analysis',
+        'description': 'Análise de código limpo com validação multi-agente',
+        'code': codigo_bom,
+        'filename': 'codigo_bom.py'
+    }
+    subagetic_result = await subagetic.execute_subagetic_workflow(subagetic_task)
+    
+    print(f"✅ RESULTADO COMPARATIVO - Código Limpo:")
+    print(f"   📊 Score Tradicional: {resultado_bom.overall_quality_score:.1f}/100")
+    print(f"   🤖 Análise Subagetic: {subagetic_result.get('quality_status', 'completed')}")
     print(f"   🔍 Code Smells: {len(resultado_bom.code_smells)}")
     print(f"   🎯 Predições de Defeito: {len(resultado_bom.defect_predictions)}")
     print(f"   🧪 Testes Gerados: {len(resultado_bom.generated_tests)}")
-    print(f"   ⏱️ Tempo: {resultado_bom.processing_time_seconds:.2f}s")
+    print(f"   ⏱️ Tempo Tradicional: {resultado_bom.processing_time_seconds:.2f}s")
+    print(f"   ⏱️ Iterações Subagetic: {subagetic_result.get('iterations_completed', 1)}")
     
     aguardar_enter()
     
@@ -225,11 +249,50 @@ def demo_ml_models():
     aguardar_enter()
 
 
-def demo_auto_documentacao():
-    """Demonstra sistema de auto-documentação."""
-    print_section("DEMONSTRAÇÃO: AUTO-DOCUMENTAÇÃO REVOLUCIONÁRIA")
+async def demo_auto_documentacao():
+    """Demonstra sistema de auto-documentação com DocumentationOrchestrator."""
+    print_section("DEMONSTRAÇÃO: AUTO-DOCUMENTAÇÃO COM ORCHESTRATOR")
     
-    print_step(1, "Criando Projeto de Exemplo")
+    from src.automation.documentation_orchestrator import DocumentationOrchestrator
+    from pathlib import Path
+    
+    print_step(1, "Inicializando DocumentationOrchestrator Real")
+    
+    print("🎯 Criando DocumentationOrchestrator...")
+    orchestrator = DocumentationOrchestrator(Path('.'))
+    
+    print("📊 Analisando projeto atual...")
+    # Usar o sistema real de documentação
+    results = await orchestrator.update_all_documentation(force=False, use_subagetic=True)
+    
+    print(f"✅ DOCUMENTAÇÃO GERADA AUTOMATICAMENTE:")
+    for doc_type, success in results.items():
+        status = "✅ Sucesso" if success else "⚠️ Falhou"
+        print(f"   📄 {doc_type.upper()}: {status}")
+    
+    # Mostrar estatísticas reais
+    stats = orchestrator.get_generation_stats()
+    print(f"\n📊 ESTATÍSTICAS REAIS DO SISTEMA:")
+    print(f"   📈 Total de atualizações: {stats['total_updates']}")
+    print(f"   ✅ Atualizações bem-sucedidas: {stats['successful_updates']}")
+    print(f"   📊 Taxa de sucesso: {stats['success_rate']:.1f}%")
+    print(f"   ⏱️ Última atualização: {stats.get('last_update', 'N/A')}")
+    
+    aguardar_enter()
+    
+    print_step(2, "Validação Automática de Qualidade")
+    
+    validation_results = await orchestrator.validate_all_documentation()
+    
+    print("🔍 VALIDAÇÃO AUTOMÁTICA EXECUTADA:")
+    for doc_type, validation in validation_results.items():
+        if validation:
+            score = validation.get('score', 0)
+            is_valid = validation.get('is_valid', False)
+            status = "✅ Válido" if is_valid else "⚠️ Precisa melhorar"
+            print(f"   📄 {doc_type.upper()}: {status} (Score: {score}%)")
+    
+    print_step(3, "Demonstração de Projeto Real")
     
     # Simular criação de arquivo
     exemplo_codigo = '''
@@ -502,7 +565,7 @@ async def main():
         demo_ml_models()
         
         # 3. Auto-documentação
-        demo_auto_documentacao()
+        await demo_auto_documentacao()
         
         # 4. Interface web
         demo_interface_web()

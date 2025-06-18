@@ -101,7 +101,11 @@ class DocumentationOrchestrator:
                 self.project_root, 
                 "Comprehensive documentation update with quality assurance"
             )
-            self.logger.info(f"Subagetic quality score: {subagetic_result.get('overall_quality', 0.0):.2f}")
+            overall_quality = subagetic_result.get('overall_quality')
+            if overall_quality is not None:
+                self.logger.info(f"Subagetic quality score: {overall_quality:.2f}")
+            else:
+                self.logger.info("Subagetic framework executed - using simulated components")
         else:
             self.logger.info("Starting comprehensive documentation update")
         

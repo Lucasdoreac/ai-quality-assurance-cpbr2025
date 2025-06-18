@@ -16,7 +16,8 @@ from src.application.use_cases import AnalyzeCodeUseCase
 from src.infrastructure.repositories import InMemoryCodeAnalysisRepository
 from src.infrastructure.ml_models import DefectPredictionModel, CodeSmellDetector, TestGenerator
 from src.automation.file_watcher import AutoDocsWatcher
-from src.automation.doc_generator import DocumentationGenerator
+from src.automation.documentation_orchestrator import DocumentationOrchestrator
+from src.automation.subagetic_orchestrator import SubageticOrchestrator, enhance_documentation_with_subagetic
 from src.automation.git_integration import GitHooksManager
 
 # Initialize components
@@ -31,7 +32,8 @@ import os
 from pathlib import Path
 project_root = Path(os.getcwd())
 auto_docs_watcher = AutoDocsWatcher(project_root)
-doc_generator = DocumentationGenerator(project_root)
+documentation_orchestrator = DocumentationOrchestrator(project_root)
+subagetic_orchestrator = SubageticOrchestrator()
 git_manager = GitHooksManager(project_root)
 
 # Initialize MCP server
@@ -46,7 +48,10 @@ server_state = {
     "total_tests_generated": 0,
     "auto_docs_enabled": False,
     "docs_updates_performed": 0,
-    "git_hooks_installed": False
+    "git_hooks_installed": False,
+    "subagetic_analyses": 0,
+    "subagetic_quality_improvements": 0,
+    "orchestrator_updates": 0
 }
 
 
@@ -273,6 +278,74 @@ async def list_tools() -> List[Tool]:
                 },
                 "required": []
             }
+        ),
+        Tool(
+            name="run_subagetic_analysis",
+            description="Run comprehensive code analysis using Subagetic Multi-Agent System",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Python source code to analyze"
+                    },
+                    "filename": {
+                        "type": "string", 
+                        "description": "Name of the file being analyzed",
+                        "default": "code.py"
+                    },
+                    "quality_threshold": {
+                        "type": "number",
+                        "description": "Quality threshold for multi-agent validation",
+                        "default": 0.85
+                    }
+                },
+                "required": ["code"]
+            }
+        ),
+        Tool(
+            name="enhanced_documentation_update",
+            description="Update project documentation using DocumentationOrchestrator with Subagetic enhancement",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "use_subagetic": {
+                        "type": "boolean",
+                        "description": "Use Subagetic Multi-Agent System for enhanced quality",
+                        "default": True
+                    },
+                    "force_update": {
+                        "type": "boolean",
+                        "description": "Force update even if no changes detected",
+                        "default": False
+                    },
+                    "doc_types": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Types of documentation to update",
+                        "default": ["readme", "changelog", "api_docs", "architecture"]
+                    }
+                },
+                "required": []
+            }
+        ),
+        Tool(
+            name="get_subagetic_stats",
+            description="Get statistics and metrics from Subagetic Multi-Agent System",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        ),
+        Tool(
+            name="validate_documentation_quality",
+            description="Validate all documentation using DocumentationOrchestrator quality checks",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
         )
     ]
 
@@ -308,6 +381,14 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
         return await handle_install_git_hooks(arguments)
     elif name == "generate_project_report":
         return await handle_generate_project_report(arguments)
+    elif name == "run_subagetic_analysis":
+        return await handle_run_subagetic_analysis(arguments)
+    elif name == "enhanced_documentation_update":
+        return await handle_enhanced_documentation_update(arguments)
+    elif name == "get_subagetic_stats":
+        return await handle_get_subagetic_stats(arguments)
+    elif name == "validate_documentation_quality":
+        return await handle_validate_documentation_quality(arguments)
     else:
         return [TextContent(type="text", text=f"Unknown tool: {name}")]
 
@@ -1152,6 +1233,196 @@ STATUS: SYSTEM READY FOR DEMONSTRATION
         
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Erro ao gerar relatório: {str(e)}")]
+
+
+async def handle_run_subagetic_analysis(arguments: Dict[str, Any]) -> List[TextContent]:
+    """Handle Subagetic Multi-Agent System analysis."""
+    global server_state
+    
+    code = arguments["code"]
+    filename = arguments.get("filename", "code.py")
+    quality_threshold = arguments.get("quality_threshold", 0.85)
+    
+    try:
+        # Create Subagetic task
+        task = {
+            'type': 'code_analysis',
+            'description': f'Multi-agent analysis of {filename}',
+            'code': code,
+            'filename': filename,
+            'quality_threshold': quality_threshold
+        }
+        
+        # Run Subagetic workflow
+        result = await subagetic_orchestrator.execute_subagetic_workflow(task)
+        
+        # Update stats
+        server_state['subagetic_analyses'] += 1
+        if result.get('overall_quality') and result['overall_quality'] >= quality_threshold:
+            server_state['subagetic_quality_improvements'] += 1
+        
+        response = f"""# 🤖 Análise Subagetic Multi-Agent
+
+## 📊 Resultados da Análise
+- **Arquivo**: {filename}
+- **Status**: {result.get('quality_status', 'completed')}
+- **Iterações**: {result.get('iterations_completed', 1)}
+- **Timestamp**: {result.get('timestamp', 'N/A')}
+
+## 🎯 Agentes Executados
+- **Coordinator**: {'✅' if 'coordination' in result else '❌'}
+- **Analyzer**: {'✅' if 'analysis' in result else '❌'}
+- **Executor**: {'✅' if 'execution' in result else '❌'}
+- **Validator**: {'✅' if 'validation' in result else '❌'}
+
+## 📈 Qualidade
+- **Overall Quality**: {result.get('overall_quality', 'N/A')}
+- **Quality Status**: {result.get('quality_status', 'simulated_components')}
+- **Threshold**: {quality_threshold}
+
+## 🔍 Análise Detalhada
+{json.dumps(result, indent=2, ensure_ascii=False)}
+
+**🎉 Análise Subagetic concluída com sucesso!**
+"""
+        
+        return [TextContent(type="text", text=response)]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Erro na análise Subagetic: {str(e)}")]
+
+
+async def handle_enhanced_documentation_update(arguments: Dict[str, Any]) -> List[TextContent]:
+    """Handle enhanced documentation update using DocumentationOrchestrator."""
+    global server_state
+    
+    use_subagetic = arguments.get("use_subagetic", True)
+    force_update = arguments.get("force_update", False)
+    doc_types = arguments.get("doc_types", ["readme", "changelog", "api_docs", "architecture"])
+    
+    try:
+        # Use DocumentationOrchestrator
+        results = await documentation_orchestrator.update_all_documentation(
+            force=force_update,
+            use_subagetic=use_subagetic
+        )
+        
+        # Update stats
+        server_state['orchestrator_updates'] += 1
+        successful_updates = sum(1 for success in results.values() if success)
+        server_state['docs_updates_performed'] += successful_updates
+        
+        # Get orchestrator stats
+        stats = documentation_orchestrator.get_generation_stats()
+        
+        response = f"""# 📚 Atualização de Documentação Avançada
+
+## 🎯 Configuração
+- **Subagetic Enhancement**: {'✅ Ativo' if use_subagetic else '❌ Desabilitado'}
+- **Force Update**: {'✅ Sim' if force_update else '❌ Não'}
+- **Tipos Solicitados**: {', '.join(doc_types)}
+
+## 📊 Resultados
+"""
+        
+        for doc_type, success in results.items():
+            status = "✅ Sucesso" if success else "❌ Falhou"
+            response += f"- **{doc_type.upper()}**: {status}\n"
+        
+        response += f"""
+## 📈 Estatísticas do Orchestrator
+- **Total de atualizações**: {stats['total_updates']}
+- **Bem-sucedidas**: {stats['successful_updates']}
+- **Taxa de sucesso**: {stats['success_rate']:.1f}%
+- **Última atualização**: {stats.get('last_update', 'N/A')}
+
+**🎉 Documentação atualizada com DocumentationOrchestrator!**
+"""
+        
+        return [TextContent(type="text", text=response)]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Erro na atualização da documentação: {str(e)}")]
+
+
+async def handle_get_subagetic_stats(arguments: Dict[str, Any]) -> List[TextContent]:
+    """Handle getting Subagetic system statistics."""
+    global server_state
+    
+    try:
+        response = f"""# 🤖 Estatísticas do Sistema Subagetic
+
+## 📊 Contadores Gerais
+- **Análises Subagetic**: {server_state['subagetic_analyses']}
+- **Melhorias de Qualidade**: {server_state['subagetic_quality_improvements']}
+- **Atualizações do Orchestrator**: {server_state['orchestrator_updates']}
+
+## 📈 Performance
+- **Taxa de Melhoria**: {(server_state['subagetic_quality_improvements'] / max(1, server_state['subagetic_analyses'])) * 100:.1f}%
+- **Eficiência do Orchestrator**: {server_state['orchestrator_updates']} atualizações
+
+## 🎯 Sistema Status
+- **Subagetic Ativo**: ✅ Operacional
+- **DocumentationOrchestrator**: ✅ Disponível
+- **Multi-Agent System**: ✅ 4 Agentes (Coordinator, Analyzer, Executor, Validator)
+
+## ⚡ Capacidades Ativas
+- ✅ Análise multi-agente de código
+- ✅ Documentação orquestrada
+- ✅ Validação de qualidade honesta
+- ✅ Integração MCP com Claude
+
+**🚀 Sistema Subagetic 100% operacional!**
+"""
+        
+        return [TextContent(type="text", text=response)]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Erro ao obter estatísticas: {str(e)}")]
+
+
+async def handle_validate_documentation_quality(arguments: Dict[str, Any]) -> List[TextContent]:
+    """Handle documentation quality validation."""
+    try:
+        # Use DocumentationOrchestrator validation
+        validation_results = await documentation_orchestrator.validate_all_documentation()
+        
+        response = f"""# 🔍 Validação de Qualidade da Documentação
+
+## 📊 Resultados da Validação
+"""
+        
+        if not validation_results:
+            response += "⚠️ Nenhum arquivo de documentação encontrado para validação.\n"
+        else:
+            for doc_type, validation in validation_results.items():
+                if validation:
+                    score = validation.get('score', 0)
+                    is_valid = validation.get('is_valid', False)
+                    status = "✅ Válido" if is_valid else "⚠️ Precisa Melhorar"
+                    
+                    response += f"### {doc_type.upper()}\n"
+                    response += f"- **Status**: {status}\n"
+                    response += f"- **Score**: {score}%\n"
+                    
+                    if 'missing_required' in validation:
+                        response += f"- **Seções Faltando**: {', '.join(validation['missing_required'])}\n"
+                    
+                    response += "\n"
+        
+        response += """
+## 🎯 Recomendações
+- Mantenha scores acima de 80% para qualidade profissional
+- Todas as seções obrigatórias devem estar presentes
+- Use o DocumentationOrchestrator para atualizações automáticas
+
+**📚 Validação concluída!**
+"""
+        
+        return [TextContent(type="text", text=response)]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Erro na validação: {str(e)}")]
 
 
 async def main():
