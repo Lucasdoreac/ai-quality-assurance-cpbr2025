@@ -145,15 +145,9 @@ jobs:
         else
           echo "📝 Committing documentation updates..."
           git add *.md
-          git commit -m "docs: Auto-update documentation by GitHub Actions
-
-🤖 Generated documentation automatically:
-- README.md with current project stats
-- CHANGELOG.md with implemented improvements
-
-All CodeRabbit and Sourcery AI recommendations implemented.
-
-Co-Authored-By: Auto-Docs Bot <action@github.com>"
+          
+          # Use single-line commit message to avoid YAML issues
+          git commit -m "docs: Auto-update documentation by GitHub Actions - Generated README.md and CHANGELOG.md with current project stats and implemented improvements"
           
           git push origin enhanced-auto-docs-system
           echo "✅ Documentation committed and pushed"
