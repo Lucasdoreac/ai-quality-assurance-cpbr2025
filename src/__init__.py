@@ -1,1 +1,0 @@
-# AI Quality Assurance System - Campus Party Brasil 2025
