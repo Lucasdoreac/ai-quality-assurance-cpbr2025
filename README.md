@@ -136,7 +136,7 @@ python -m src.automation.file_watcher_optimized
 
 ## 🤖 Sistema Auto-Documentado
 
-**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-18 12:20:25.
+**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-18 12:49:58.
 
 A documentação é atualizada automaticamente sempre que:
 - ✅ Código fonte é modificado
@@ -154,4 +154,4 @@ A documentação é atualizada automaticamente sempre que:
 
 *Desenvolvido com ❤️ por [Aulus Diniz](https://linkedin.com/in/aulus-diniz-9aaab352/) para a comunidade tech brasileira*
 
-*Última atualização automática: 2025-06-18 12:20:25*
+*Última atualização automática: 2025-06-18 12:49:58*
