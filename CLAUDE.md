@@ -1,103 +1,319 @@
-# CLAUDE.md - AI Quality Assurance Auto-Documentation System
+# CLAUDE.md
 
-## 🚨 MISSÃO CRÍTICA ATIVA
-**STATUS:** Sistema de auto-documentação com todas as correções dos bots implementadas, mas GitHub Actions falhando.
-**OBJETIVO:** Fazer workflow usar as implementações REAIS ao invés de script "falso positivo".
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📋 CONTEXTO COMPLETO DA SITUAÇÃO
+## Project Overview
 
-### 🎯 **O que foi implementado (TODAS as 14 recomendações dos bots):**
-- ✅ **SecurityFixes**: `SecureSubprocessRunner` com `shlex.escape()` em `scripts/setup_automation_secure.py`
-- ✅ **Modular Refactoring**: 6 classes focadas:
-  - `DocumentationOrchestrator` (coordenação)
-  - `ProjectAnalyzer` (análise)
-  - `ReadmeGenerator` (README)
-  - `ChangelogGenerator` (CHANGELOG)
-  - `TemplateManager` (templates externos)
-  - `file_watcher_optimized.py` (sem time.sleep)
-- ✅ **Performance**: Eliminação de time.sleep() loops
-- ✅ **Testing**: Testes expandidos com validação de conteúdo
-- ✅ **Templates**: Externalizados em `src/automation/templates/`
+AI Quality Assurance Auto-Documentation System - A real functional system that demonstrates AI-powered code analysis with automatic documentation generation. Built for Campus Party Brasil 2025 demonstration.
 
-### 🔥 **PROBLEMA ATUAL:**
-- GitHub Actions está usando script inline FALSO que apenas "menciona" as correções
-- NÃO está importando/usando as classes reais implementadas
-- Workflow passa mas é "fake" - bots vão perceber que não usamos as implementações
+## Development Commands
 
-### 📊 **Evidence do Problema:**
-```python
-# Workflow atual (FAKE):
-cat > generate_docs.py << 'EOF'
-# Script inline simples que só menciona as correções no texto
-# MAS NÃO USA DocumentationOrchestrator nem outras classes
-EOF
+### Setup and Installation
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-# O que deveria usar (REAL):
-from src.automation.documentation_orchestrator import DocumentationOrchestrator
-orchestrator = DocumentationOrchestrator(Path('.'))
-results = await orchestrator.update_all_documentation()
+# Setup secure automation system
+python scripts/setup_automation_secure.py
+
+# Install pre-commit hooks (optional)
+pre-commit install
 ```
 
-## 🎯 ESTRATÉGIA PAL MULTI-AGENTE NECESSÁRIA
-
-### **Agent 1: System Architect**
-Mapear todas as classes implementadas e suas dependências para criar blueprint de integração completo.
-
-### **Agent 2: GitHub Actions Builder** 
-Criar workflow que REALMENTE importa e usa:
-- `DocumentationOrchestrator`
-- `SecureSubprocessRunner` 
-- Todas as 6 classes refatoradas
-- Com fallbacks se imports falharem
-
-### **Agent 3: Local Tester**
-Testar localmente que todas as importações funcionam antes de commit.
-
-### **Agent 4: Bot Compliance Validator**
-Verificar que TODAS as 14 recomendações são realmente USADAS, não apenas mencionadas.
-
-## 🔧 COMANDOS ESSENCIAIS
-
-### **Test Local Implementation:**
+### Running the Application
 ```bash
-# Testar se implementações funcionam
+# Start FastAPI web server
+python -m uvicorn src.main:app --reload --port 8000
+
+# Start MCP server for Claude integration
+python mcp_server.py
+
+# Test documentation generation
+python test_auto_docs.py
+```
+
+### Testing
+```bash
+# Run all tests
+pytest
+
+# Run specific test files
+pytest tests/test_security_fixes.py
+pytest tests/test_content_validation.py
+
+# Run with coverage
+pytest --cov=src --cov-report=html
+```
+
+### Development Tools
+```bash
+# Code formatting
+black src/ tests/
+
+# Linting
+flake8 src/ tests/
+
+# Type checking
+mypy src/
+
+# Test import of main components
+python3 -c "from src.automation.documentation_orchestrator import DocumentationOrchestrator; print('✅ Import successful')"
+```
+
+## Architecture
+
+### Core System Architecture
+```
+src/
+├── domain/           # Business entities and domain logic
+├── application/      # Use cases and application services
+├── infrastructure/   # External integrations (ML models, repositories)
+└── automation/       # Auto-documentation system ⭐
+```
+
+### Auto-Documentation System (Key Component)
+The system uses a modular, orchestrated approach with 6 specialized classes:
+
+1. **DocumentationOrchestrator** (`src/automation/documentation_orchestrator.py`) - Main coordinator
+2. **ProjectAnalyzer** (`src/automation/project_analyzer.py`) - Code analysis and metrics
+3. **ReadmeGenerator** (`src/automation/readme_generator.py`) - README.md generation
+4. **ChangelogGenerator** (`src/automation/changelog_generator.py`) - CHANGELOG.md management
+5. **TemplateManager** (`src/automation/template_manager.py`) - External template handling
+6. **FileWatcherOptimized** (`src/automation/file_watcher_optimized.py`) - Performance-optimized file monitoring
+
+### Security Implementation
+- **SecureSubprocessRunner** in `scripts/setup_automation_secure.py` uses `shlex.escape()` for command injection prevention
+- All subprocess calls are sanitized and validated
+
+## Key Configuration
+
+### Main Configuration File
+`config/automation_config.yaml` - Complete system configuration including:
+- File watching patterns and ignore rules
+- Documentation generation settings
+- Git integration settings
+- MCP server configuration
+- Performance and logging settings
+
+### Entry Points
+- **Web Interface**: `src/main.py` (FastAPI application)
+- **MCP Server**: `mcp_server.py` (Claude integration)
+- **Auto-Documentation**: `scripts/setup_automation_secure.py`
+
+## Important Implementation Details
+
+### Dependencies Stack
+- **Web**: FastAPI, Uvicorn
+- **ML**: scikit-learn, numpy, pandas
+- **Documentation**: Jinja2, PyYAML
+- **MCP**: mcp, anthropic
+- **Testing**: pytest, pytest-asyncio, pytest-cov
+- **Security**: cryptography, shlex (built-in)
+
+### File Structure Patterns
+- Tests in `tests/` directory with `test_*.py` naming
+- All automation classes in `src/automation/`
+- Templates in `src/automation/templates/`
+- Configuration in `config/`
+- Scripts in `scripts/`
+
+### Current Status
+- **Branch**: `enhanced-auto-docs-system` 
+- **Status**: All bot recommendations implemented but GitHub Actions needs to use real implementations
+- **Issue**: Workflow uses inline script instead of importing actual classes
+
+## Critical Notes for Development
+
+### Testing Imports Before Changes
+Always test that the modular components can be imported:
+```bash
 python3 -c "
 from src.automation.documentation_orchestrator import DocumentationOrchestrator
-from pathlib import Path
-orchestrator = DocumentationOrchestrator(Path('.'))
-print('✅ Import successful')
+from src.automation.project_analyzer import ProjectAnalyzer
+from scripts.setup_automation_secure import SecureSubprocessRunner
+print('✅ All imports successful')
 "
 ```
 
-### **Check Implemented Classes:**
+### GitHub Actions Integration
+The current workflow (`.github/workflows/auto-docs.yml`) uses inline documentation generation instead of the implemented classes. When updating this workflow, ensure it imports and uses the real implementations.
+
+### MCP Server Integration
+The system provides MCP tools for Claude integration. The server exposes various code analysis and documentation tools through the MCP protocol.
+
+### Auto-Documentation Trigger
+The system monitors file changes and automatically updates documentation. Key files that trigger updates:
+- Any `.py` file in `src/`
+- Test files (`test_*.py`)
+- Configuration files (`.yaml`, `.json`)
+- Requirements and setup files
+## 🤖 Subagetic Self-Prompting PAL Workflow
+
+### Overview
+A multi-agent system with self-prompting capabilities for complex problem solving. Each agent continuously improves through self-reflection and cross-agent collaboration.
+
+### Architecture
+```
+┌─────────────────────────────────────────────────────────┐
+│                COORDINATOR AGENT                        │
+│  • Task decomposition & orchestration                  │
+│  • Self-prompting iteration control                    │
+│  • Cross-agent communication hub                       │
+└─────────────────────────────────────────────────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+┌───────▼───────┐ ┌────────▼────────┐ ┌──────▼──────┐
+│ ANALYZER AGENT │ │ EXECUTOR AGENT  │ │ VALIDATOR   │
+│ • Problem      │ │ • Code/solution │ │ • Quality   │
+│   analysis     │ │   generation    │ │   assurance │
+│ • Pattern      │ │ • Implementation│ │ • Testing   │
+│   recognition  │ │ • Optimization  │ │ • Feedback  │
+└────────────────┘ └─────────────────┘ └─────────────┘
+```
+
+### Self-Prompting Mechanism
+Each agent maintains:
+- Context memory for learning retention
+- Self-evaluation criteria for quality assessment
+- Iterative improvement prompts for continuous enhancement
+- Cross-agent feedback loops for collaborative learning
+
+### Agent Roles and Self-Prompting Templates
+
+#### Coordinator Agent
+```python
+COORDINATOR_SELF_PROMPT = """
+Role: Task orchestration and workflow management
+
+Self-Prompting Questions:
+- "How can I better decompose this complex task?"
+- "What dependencies exist between subtasks?"
+- "Am I allocating work optimally across agents?"
+- "What have I learned from previous iterations?"
+
+Responsibilities:
+- Initial task decomposition
+- Agent work allocation  
+- Progress monitoring
+- Cross-agent communication
+- Iteration control and refinement
+"""
+```
+
+#### Analyzer Agent
+```python
+ANALYZER_SELF_PROMPT = """
+Role: Deep problem analysis and pattern recognition
+
+Self-Prompting Questions:
+- "What underlying patterns am I detecting?"
+- "Have I considered all problem dimensions?"
+- "What assumptions might be limiting my analysis?"
+- "How can I improve my analytical framework?"
+
+Responsibilities:
+- Problem space exploration
+- Constraint identification
+- Pattern recognition
+- Risk analysis
+- Solution space mapping
+"""
+```
+
+#### Executor Agent
+```python
+EXECUTOR_SELF_PROMPT = """
+Role: Solution implementation and optimization
+
+Self-Prompting Questions:
+- "Is this the most elegant solution approach?"
+- "Have I considered performance implications?"
+- "What alternative implementations exist?"
+- "How can I make this more maintainable?"
+
+Responsibilities:
+- Code/solution generation
+- Implementation optimization
+- Resource efficiency
+- Scalability considerations
+- Documentation generation
+"""
+```
+
+#### Validator Agent
+```python
+VALIDATOR_SELF_PROMPT = """
+Role: Quality assurance and testing
+
+Self-Prompting Questions:
+- "What edge cases have I missed?"
+- "Are my test scenarios comprehensive?"
+- "How can I strengthen validation criteria?"
+- "What failure modes should I anticipate?"
+
+Responsibilities:
+- Solution verification
+- Test case generation
+- Quality metrics evaluation
+- Error detection
+- Improvement recommendations
+"""
+```
+
+### Usage Template for This Project
+
+For applying subagetic PAL workflow to auto-documentation system issues:
+
+```python
+# PROJECT-SPECIFIC SUBAGETIC APPLICATION
+AUTODOCS_SUBAGETIC_PROMPT = """
+MISSION: {specific_problem_description}
+
+COORDINATOR_TASK:
+- Analyze current system architecture
+- Map implementation dependencies
+- Orchestrate integration strategy
+- Self-prompt: "How can I ensure seamless integration?"
+
+ANALYZER_TASK:
+- Deep analysis of existing implementations
+- Identify potential integration challenges
+- Examine DocumentationOrchestrator, SecureSubprocessRunner, etc.
+- Self-prompt: "What hidden dependencies might cause issues?"
+
+EXECUTOR_TASK:
+- Generate optimized implementation
+- Create fallback mechanisms
+- Implement proper error handling
+- Self-prompt: "How can I make this bulletproof?"
+
+VALIDATOR_TASK:
+- Comprehensive testing strategy
+- Validate all integrations work
+- Ensure bot compliance requirements met
+- Self-prompt: "How can I prove this meets all requirements?"
+
+QUALITY_GATES:
+- All imports must succeed
+- Real implementations must be used (not mentioned)
+- Performance must meet or exceed current system
+- Bot recommendations must be demonstrably implemented
+"""
+```
+
+### Implementation Commands
+
 ```bash
-ls -la src/automation/  # Ver classes refatoradas
-ls -la scripts/setup_automation_secure.py  # Ver SecureSubprocessRunner
+# Test subagetic workflow components
+python3 -c "
+from src.automation.documentation_orchestrator import DocumentationOrchestrator
+from src.automation.project_analyzer import ProjectAnalyzer
+from scripts.setup_automation_secure import SecureSubprocessRunner
+print('✅ Subagetic PAL components ready')
+"
+
+# Apply subagetic workflow to current problem
+# Use the 4-agent system to systematically solve complex integration issues
 ```
-
-### **Current Branches:**
-- `enhanced-auto-docs-system` - Todas as correções implementadas
-- **PR #1**: https://github.com/Lucasdoreac/ai-quality-assurance-cpbr2025/pull/1
-
-## 🚀 GOAL FINAL
-Fazer bots CodeRabbit e Sourcery AI revisarem e confirmarem que implementamos TODAS as suas recomendações corretamente.
-
-## 📁 PROJECT STRUCTURE
-```
-/Users/lucascardoso/apps/MCP/aulus/
-├── src/automation/
-│   ├── documentation_orchestrator.py  ✅ Implemented
-│   ├── project_analyzer.py           ✅ Implemented  
-│   ├── readme_generator.py           ✅ Implemented
-│   ├── changelog_generator.py        ✅ Implemented
-│   ├── template_manager.py           ✅ Implemented
-│   ├── file_watcher_optimized.py     ✅ Implemented
-│   └── templates/                    ✅ Implemented
-├── scripts/
-│   └── setup_automation_secure.py    ✅ Implemented
-└── .github/workflows/
-    └── auto-docs.yml                 ❌ FAKE (needs real implementation)
-```
-
-## ⚡ URGENT ACTION NEEDED
-Substituir workflow "fake" por sistema que REALMENTE usa todas as implementações das correções dos bots.
+EOF < /dev/null
