@@ -1,16 +1,35 @@
-# 🤖 AI Quality Assurance System + Auto-Documentation
+# 🤖 AI Quality Assurance System
 
 ### Real AI-powered code analysis with revolutionary auto-documentation
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com)
-[![Auto-Docs](https://img.shields.io/badge/Documentation-Auto--Generated-brightgreen.svg)](#)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org) [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)](https://fastapi.tiangolo.com) [![Auto-Docs](https://img.shields.io/badge/Documentation-Auto--Generated-brightgreen.svg)](#) [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](#)
 
 ---
 
 ## 🎯 Sistema Completamente Funcional
 
 Este é um **sistema real e funcional** que demonstra o estado da arte em IA aplicada à garantia da qualidade de software. Inclui **sistema de auto-documentação** que mantém toda a documentação atualizada automaticamente.
+
+## 🧠 Funcionalidades Implementadas
+
+### 🔍 **Análise Inteligente de Código**
+- **Parsing AST real** com módulo Python `ast`
+- **37+ dependências** para análise avançada
+- **Detecção de Code Smells** com confiança 85-90%
+- **Análise de complexidade** ciclomática em tempo real
+
+### 📚 **Auto-Documentação Revolucionária**
+- **Documentação que se escreve sozinha** quando código muda
+- **README automático** com análise de projeto (este arquivo!)
+- **CHANGELOG inteligente** seguindo padrões industriais
+- **API docs** geradas automaticamente
+- **Monitoramento em tempo real** de mudanças no código
+
+### 🤖 **Integração MCP com Claude**
+- **0 ferramentas MCP** disponíveis
+- **Integração nativa** com Claude Code
+- **Análise de código em tempo real**
+- **Geração automática de testes**
 
 ## 🚀 Quick Start
 
@@ -23,7 +42,7 @@ python -m uvicorn src.main:app --reload --port 8000
 ### MCP Server para Claude
 ```bash
 python mcp_server.py
-# 13 ferramentas disponíveis
+# 0 ferramentas disponíveis
 ```
 
 ### Sistema de Auto-Documentação
@@ -32,59 +51,27 @@ python scripts/setup_automation.py
 # Documentação se atualiza automaticamente
 ```
 
-## 🧠 Funcionalidades Implementadas
-
-### 🔍 **Análise Inteligente de Código**
-- **Parsing AST real** com módulo Python `ast`
-- **38+ dependências** para análise avançada
-- **Detecção de Code Smells** com confiança 85-90%
-- **Análise de complexidade** ciclomática em tempo real
-
-### 📚 **Auto-Documentação Revolucionária**
-- **Documentação que se escreve sozinha** quando código muda
-- **README automático** com análise de projeto (este arquivo!)
-- **CHANGELOG inteligente** seguindo padrões industriais
-- **API docs** geradas automaticamente
-- **Monitoramento em tempo real** de mudanças no código
-
 ## 🏗️ Arquitetura do Sistema
 
 ```
-/
+ai-quality-assurance/
 ├── src/
 │   ├── domain/           # Entidades e regras de negócio
 │   ├── application/      # Casos de uso e lógica de aplicação
 │   ├── infrastructure/   # Implementações e adapters
 │   └── automation/       # Sistema de auto-documentação ⭐
-│       ├── file_watcher.py    # Monitoramento em tempo real
-│       ├── doc_generator.py   # Geração automática de docs
-│       └── git_integration.py # Integração com Git
-├── tests/               # 5 arquivos de teste
-├── mcp_server.py        # Servidor MCP com 13 ferramentas
-└── requirements.txt     # 38 dependências
+├── tests/               # 4 arquivos de teste
+├── mcp_server.py        # Servidor MCP
+└── requirements.txt     # 37 dependências
 ```
 
 ### 📊 Estatísticas do Projeto
-- **Linhas de Código**: 3,750
-- **Funções**: 85
-- **Classes**: 26
-- **Arquivos de Teste**: 5
-- **Ferramentas MCP**: 13
-
-## 🛠️ Ferramentas MCP Disponíveis (13)
-
-- **analyze_code**: Ferramenta MCP disponível
-- **predict_defects**: Ferramenta MCP disponível
-- **detect_code_smells**: Ferramenta MCP disponível
-- **generate_tests**: Ferramenta MCP disponível
-- **calculate_metrics**: Ferramenta MCP disponível
-- **get_system_stats**: Ferramenta MCP disponível
-- **train_defect_model**: Ferramenta MCP disponível
-- **update_documentation**: Ferramenta MCP disponível
-- **start_auto_docs**: Ferramenta MCP disponível
-- **stop_auto_docs**: Ferramenta MCP disponível
-- ... e mais 3 ferramentas
-
+- **Linhas de Código**: 6,170
+- **Funções**: 253
+- **Classes**: 48
+- **Arquivos de Teste**: 4
+- **Ferramentas MCP**: 0
+- **Dependências**: 37
 
 ## 📦 Instalação e Configuração
 
@@ -100,32 +87,44 @@ python scripts/setup_automation.py
 python -m uvicorn src.main:app --reload --port 8000
 ```
 
-### Sistema de Auto-Documentação
-```bash
-# Iniciar monitoramento automático
-python -m src.automation.file_watcher
+## 💡 Exemplos de Uso
 
-# Documentação se atualiza automaticamente quando código muda!
+### 🔍 Análise de Código via MCP
+```python
+# Use no Claude Code:
+# "Analise este código Python para detectar code smells"
+# "Gere testes automatizados para esta função"
+# "Calcule métricas de complexidade"
 ```
 
-## 📊 Métricas de Performance
+### 📚 Auto-Documentação
+```python
+# Sistema monitora mudanças e atualiza docs automaticamente
+# Cada commit aciona atualizações de:
+# - README.md (este arquivo)
+# - CHANGELOG.md
+# - API_DOCS.md
+# - ARCHITECTURE.md
+```
 
-### **Performance do Sistema**
-- **Tempo de análise**: <2 segundos
-- **Métricas calculadas**: 15+ por análise
-- **Code smells detectados**: 5 tipos principais
-- **Testes gerados**: 3 categorias automáticas
-- **Documentação**: Atualizada em <5 segundos
+## 🤝 Contribuindo
 
-### **Automação de Documentação**
-- **Tempo de atualização**: <5 segundos após mudança
-- **Cobertura**: 100% automática
-- **Precisão**: 95%+ na detecção de mudanças relevantes
-- **Economia de tempo**: 90%+ vs documentação manual
+### Melhorias Implementadas (baseadas em análise de bots)
+- ✅ **Segurança**: Correções de vulnerabilidades de injeção de comando
+- ✅ **Performance**: Eliminação de time.sleep() desnecessário
+- ✅ **Arquitetura**: Refatoração em classes menores e focadas
+- ✅ **Testes**: Expansão de cobertura e validação de conteúdo
+
+### Como Contribuir
+1. Fork o projeto
+2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
 ## 🤖 Sistema Auto-Documentado
 
-**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-17 14:28:26.
+**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-17 22:12:40.
 
 A documentação é atualizada automaticamente sempre que:
 - ✅ Código fonte é modificado
@@ -143,4 +142,4 @@ A documentação é atualizada automaticamente sempre que:
 
 *Desenvolvido com ❤️ por [Aulus Diniz](https://linkedin.com/in/aulus-diniz-9aaab352/) para a comunidade tech brasileira*
 
-*Última atualização automática: 2025-06-17 14:28:26*
+*Última atualização automática: 2025-06-17 22:12:40*
