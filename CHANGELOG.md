@@ -38,4 +38,4 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ---
 
 *Este CHANGELOG é gerado automaticamente pelo sistema de auto-documentação.*
-*Última atualização: 2025-06-18 13:17:39*
+*Última atualização: 2025-06-18 13:26:54*
