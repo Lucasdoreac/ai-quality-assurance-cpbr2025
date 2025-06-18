@@ -147,10 +147,13 @@ The system monitors file changes and automatically updates documentation. Key fi
 - Test files (`test_*.py`)
 - Configuration files (`.yaml`, `.json`)
 - Requirements and setup files
-## 🤖 Subagetic Self-Prompting PAL Workflow
+## 🤖 **INSTRUÇÃO OBRIGATÓRIA**: Sistema Subagetic Multi-Agente
 
-### Overview
-A multi-agent system with self-prompting capabilities for complex problem solving. Each agent continuously improves through self-reflection and cross-agent collaboration.
+### **SEMPRE USE SUBAGENTES** para garantir qualidade de entrega
+Claude Code deve OBRIGATORIAMENTE usar o sistema de subagentes dinâmicos para todas as tarefas complexas neste projeto. Isso garante qualidade, validação e entrega confiável.
+
+### Arquitetura Obrigatória
+**NUNCA trabalhe sozinho em tarefas complexas - SEMPRE decomponha em 4 agentes:**
 
 ### Architecture
 ```
@@ -261,9 +264,9 @@ Responsibilities:
 """
 ```
 
-### Usage Template for This Project
+### **OBRIGATÓRIO**: Template de Uso para Este Projeto
 
-For applying subagetic PAL workflow to auto-documentation system issues:
+**TODA TAREFA COMPLEXA deve seguir este padrão subagetic PAL:**
 
 ```python
 # PROJECT-SPECIFIC SUBAGETIC APPLICATION
@@ -302,18 +305,28 @@ QUALITY_GATES:
 """
 ```
 
-### Implementation Commands
+### **INSTRUÇÃO PERMANENTE**: Como Usar Subagentes
 
 ```bash
-# Test subagetic workflow components
+# SEMPRE que receber tarefa complexa, use este padrão:
+
+# 1. COORDINATOR: Planeje com TodoWrite
+# 2. ANALYZER: Use Task tool para análise profunda  
+# 3. EXECUTOR: Use Edit/Write para implementação
+# 4. VALIDATOR: Use Bash para testes e validação
+
+# Exemplo de comando obrigatório:
 python3 -c "
 from src.automation.documentation_orchestrator import DocumentationOrchestrator
 from src.automation.project_analyzer import ProjectAnalyzer
 from scripts.setup_automation_secure import SecureSubprocessRunner
-print('✅ Subagetic PAL components ready')
+print('✅ Subagetic PAL system operational')
 "
-
-# Apply subagetic workflow to current problem
-# Use the 4-agent system to systematically solve complex integration issues
 ```
+
+### **REGRA DE QUALIDADE**
+- ❌ **NUNCA** implemente algo sem validação multi-agente
+- ✅ **SEMPRE** decomponha tarefas complexas em 4 agentes
+- ✅ **SEMPRE** use TodoWrite para tracking
+- ✅ **SEMPRE** valide antes de finalizar
 EOF < /dev/null

@@ -102,11 +102,13 @@ class BulletproofGitHubDocsGenerator:
             from src.automation.changelog_generator import ChangelogGenerator
             from scripts.setup_automation_secure import SecureSubprocessRunner
             
-            logger.info("🚀 Using REAL implementations for documentation generation")
+            logger.info("🚀 Using REAL implementations with Subagetic Multi-Agent System")
             
             # Use ProjectAnalyzer for real metrics
             analyzer = ProjectAnalyzer(self.project_root)
             project_metrics = analyzer.analyze_project()
+            
+            logger.info("🤖 Initializing Subagetic agents for enhanced quality")
             
             # Create config for generators
             config = {
@@ -125,6 +127,21 @@ class BulletproofGitHubDocsGenerator:
             
             # Use ChangelogGenerator with proper initialization  
             changelog_generator = ChangelogGenerator(self.project_root, config)
+            
+            # Initialize Subagetic enhancement (if available)
+            try:
+                from src.automation.subagetic_orchestrator import enhance_documentation_with_subagetic
+                async def run_subagetic():
+                    return await enhance_documentation_with_subagetic(
+                        self.project_root,
+                        "GitHub Actions documentation generation with quality assurance"
+                    )
+                subagetic_result = asyncio.run(run_subagetic())
+                logger.info(f"🤖 Subagetic quality score: {subagetic_result.get('overall_quality', 0.0):.2f}")
+                subagetic_available = True
+            except (ImportError, Exception) as e:
+                logger.info(f"Subagetic system not available: {e}")
+                subagetic_available = False
             
             # Prepare project info for generators
             project_info = {
@@ -161,6 +178,7 @@ class BulletproofGitHubDocsGenerator:
                 'files_generated': ['README.md', 'CHANGELOG.md'],
                 'metrics': project_metrics,
                 'security_used': True,  # SecureSubprocessRunner available
+                'subagetic_enhanced': subagetic_available,
                 'bot_compliance': 'CODERABBIT_SOURCERY_AI_COMPLIANCE_VERIFIED'
             }
             
@@ -291,6 +309,8 @@ if __name__ == '__main__':
     
     if result['method'] == 'real_implementations':
         print("✅ SUCCESS: Used actual DocumentationOrchestrator and security implementations!")
+        if result.get('subagetic_enhanced'):
+            print("🤖 ENHANCED: Subagetic Multi-Agent System provided quality assurance!")
         print("🤖 CodeRabbit & Sourcery AI: Your recommendations are now PROVABLY implemented!")
     else:
         print("⚠️ FALLBACK: Real implementations failed, but system provided graceful degradation")

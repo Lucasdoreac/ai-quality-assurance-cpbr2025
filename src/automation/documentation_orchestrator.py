@@ -12,6 +12,7 @@ from datetime import datetime
 from .project_analyzer import ProjectAnalyzer, ProjectMetrics
 from .readme_generator import ReadmeGenerator, ReadmeValidator
 from .changelog_generator import ChangelogGenerator, VersionManager, ChangelogValidator
+from .subagetic_orchestrator import enhance_documentation_with_subagetic
 
 logger = logging.getLogger(__name__)
 
@@ -83,17 +84,26 @@ class DocumentationOrchestrator:
             self.logger.error(f"Error initializing components: {e}")
             raise
     
-    async def update_all_documentation(self, force: bool = False) -> Dict[str, bool]:
+    async def update_all_documentation(self, force: bool = False, use_subagetic: bool = True) -> Dict[str, bool]:
         """
-        Update all documentation types.
+        Update all documentation types with optional subagetic enhancement.
         
         Args:
             force: Force update even if no changes detected
+            use_subagetic: Use subagetic multi-agent system for enhanced quality
             
         Returns:
             Dictionary with update results for each documentation type
         """
-        self.logger.info("Starting comprehensive documentation update")
+        if use_subagetic:
+            self.logger.info("🤖 Starting documentation update with Subagetic Multi-Agent System")
+            subagetic_result = await enhance_documentation_with_subagetic(
+                self.project_root, 
+                "Comprehensive documentation update with quality assurance"
+            )
+            self.logger.info(f"Subagetic quality score: {subagetic_result.get('overall_quality', 0.0):.2f}")
+        else:
+            self.logger.info("Starting comprehensive documentation update")
         
         start_time = datetime.now()
         results = {}
