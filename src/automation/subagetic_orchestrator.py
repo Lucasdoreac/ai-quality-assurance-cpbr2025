@@ -125,13 +125,13 @@ class CoordinatorAgent(SubageticAgent):
             'resource_requirements': ['analyzer', 'executor', 'validator']
         }
     
-    def _assess_coordination_quality(self, execution_plan: Dict[str, Any]) -> float:
+    def _assess_coordination_quality(self, execution_plan: Dict[str, Any]) -> Optional[float]:
         """Assess the quality of coordination."""
-        # Simple quality assessment
-        base_quality = 0.8
-        if len(execution_plan['execution_order']) > 1:
-            base_quality += 0.1  # Bonus for proper decomposition
-        return min(base_quality, 1.0)
+        # NOTE: This is a simulated quality assessment - not real measurement
+        # Real implementation would analyze task decomposition complexity, 
+        # dependency optimization, resource allocation efficiency, etc.
+        self.logger.warning("Using simulated coordination quality assessment")
+        return None  # Return None to indicate simulated/unavailable measurement
 
 
 class AnalyzerAgent(SubageticAgent):
@@ -180,9 +180,13 @@ class AnalyzerAgent(SubageticAgent):
             {'type': 'integration', 'severity': 'medium', 'mitigation': 'phased_rollout'}
         ]
     
-    def _calculate_confidence(self, analysis: Dict[str, Any]) -> float:
+    def _calculate_confidence(self, analysis: Dict[str, Any]) -> Optional[float]:
         """Calculate confidence in analysis."""
-        return 0.87  # Example confidence score
+        # NOTE: This is a simulated confidence calculation - not real measurement
+        # Real implementation would analyze data completeness, pattern consistency,
+        # uncertainty quantification, validation against known benchmarks, etc.
+        self.logger.warning("Using simulated analysis confidence calculation")
+        return None  # Return None to indicate simulated/unavailable measurement
     
     async def _generate_recommendations(self, analysis: Dict[str, Any]) -> List[str]:
         """Generate actionable recommendations."""
@@ -243,9 +247,13 @@ class ExecutorAgent(SubageticAgent):
             'throughput': '100 docs/min'
         }
     
-    def _assess_maintainability(self, implementation: Dict[str, Any]) -> float:
+    def _assess_maintainability(self, implementation: Dict[str, Any]) -> Optional[float]:
         """Assess solution maintainability."""
-        return 0.91  # High maintainability score
+        # NOTE: This is a simulated maintainability assessment - not real measurement
+        # Real implementation would analyze code complexity, coupling, cohesion,
+        # documentation coverage, test coverage, design pattern adherence, etc.
+        self.logger.warning("Using simulated maintainability assessment")
+        return None  # Return None to indicate simulated/unavailable measurement
 
 
 class ValidatorAgent(SubageticAgent):
@@ -273,16 +281,29 @@ class ValidatorAgent(SubageticAgent):
         # Self-prompting for better testing
         improvement = await self.self_prompt("What edge cases have I missed?")
         
+        # NOTE: These are simulated test results - not real test execution
+        # Real implementation would execute actual test suites, analyze coverage,
+        # run security scans, performance benchmarks, etc.
+        self.logger.warning("Using simulated test results - no real tests executed")
+        
         return {
-            'unit_tests': {'passed': 15, 'failed': 0, 'coverage': '98%'},
-            'integration_tests': {'passed': 8, 'failed': 0, 'coverage': '95%'},
-            'performance_tests': {'passed': 5, 'failed': 0, 'avg_time': '0.8s'},
-            'security_tests': {'passed': 6, 'failed': 0, 'vulnerabilities': 0}
+            'simulated': True,
+            'note': 'Test results are simulated - not from real test execution',
+            'unit_tests': {'status': 'simulated', 'note': 'Would run pytest/unittest'},
+            'integration_tests': {'status': 'simulated', 'note': 'Would run integration test suite'},
+            'performance_tests': {'status': 'simulated', 'note': 'Would run performance benchmarks'},
+            'security_tests': {'status': 'simulated', 'note': 'Would run security scans'}
         }
     
-    async def _assess_quality(self, test_results: Dict[str, Any]) -> float:
+    async def _assess_quality(self, test_results: Dict[str, Any]) -> Optional[float]:
         """Assess overall quality score."""
-        # Calculate weighted quality score
+        # Check if test results are simulated
+        if test_results.get('simulated', False):
+            self.logger.warning("Cannot calculate real quality score from simulated test results")
+            return None
+        
+        # Real quality calculation would be done here if test_results were real
+        # Calculate weighted quality score from actual test execution results
         weights = {
             'unit_tests': 0.3,
             'integration_tests': 0.3,
@@ -292,13 +313,13 @@ class ValidatorAgent(SubageticAgent):
         
         total_score = 0.0
         for test_type, weight in weights.items():
-            if test_type in test_results:
+            if test_type in test_results and 'passed' in test_results[test_type]:
                 passed = test_results[test_type]['passed']
-                total = passed + test_results[test_type]['failed']
+                total = passed + test_results[test_type].get('failed', 0)
                 score = passed / total if total > 0 else 0
                 total_score += score * weight
         
-        return total_score
+        return total_score if total_score > 0 else None
     
     async def _check_compliance(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """Check compliance with standards."""
@@ -376,35 +397,66 @@ class SubageticOrchestrator:
             overall_quality = self._calculate_overall_quality(workflow_results)
             workflow_results['overall_quality'] = overall_quality
             
-            if overall_quality >= self.config['quality_threshold']:
-                self.logger.info(f"Quality threshold met: {overall_quality:.2f}")
+            if overall_quality is None:
+                self.logger.warning("Quality assessment unavailable (using simulated components) - completing workflow")
+                workflow_results['quality_status'] = 'simulated_components'
                 break
-            
-            self.logger.warning(f"Quality below threshold: {overall_quality:.2f}, iterating...")
-            iteration += 1
+            elif overall_quality >= self.config['quality_threshold']:
+                self.logger.info(f"Quality threshold met: {overall_quality:.2f}")
+                workflow_results['quality_status'] = 'threshold_met'
+                break
+            else:
+                self.logger.warning(f"Quality below threshold: {overall_quality:.2f}, iterating...")
+                workflow_results['quality_status'] = 'below_threshold'
+                iteration += 1
         
         workflow_results['iterations_completed'] = iteration + 1
         workflow_results['timestamp'] = datetime.now().isoformat()
         
         return workflow_results
     
-    def _calculate_overall_quality(self, results: Dict[str, Any]) -> float:
+    def _calculate_overall_quality(self, results: Dict[str, Any]) -> Optional[float]:
         """Calculate overall workflow quality."""
         quality_scores = []
+        simulated_components = []
         
+        # Check coordination quality
         if 'coordination' in results:
-            quality_scores.append(results['coordination'].get('coordination_quality', 0.5))
+            coord_quality = results['coordination'].get('coordination_quality')
+            if coord_quality is not None:
+                quality_scores.append(coord_quality)
+            else:
+                simulated_components.append('coordination')
         
+        # Check analysis confidence
         if 'analysis' in results:
-            quality_scores.append(results['analysis'].get('confidence', 0.5))
+            analysis_confidence = results['analysis'].get('confidence')
+            if analysis_confidence is not None:
+                quality_scores.append(analysis_confidence)
+            else:
+                simulated_components.append('analysis')
             
+        # Check execution maintainability
         if 'execution' in results:
-            quality_scores.append(results['execution'].get('maintainability_score', 0.5))
+            maintainability = results['execution'].get('maintainability_score')
+            if maintainability is not None:
+                quality_scores.append(maintainability)
+            else:
+                simulated_components.append('execution')
             
+        # Check validation quality
         if 'validation' in results:
-            quality_scores.append(results['validation'].get('quality_score', 0.5))
+            validation_quality = results['validation'].get('quality_score')
+            if validation_quality is not None:
+                quality_scores.append(validation_quality)
+            else:
+                simulated_components.append('validation')
         
-        return sum(quality_scores) / len(quality_scores) if quality_scores else 0.0
+        if simulated_components:
+            self.logger.warning(f"Cannot calculate real overall quality - simulated components: {simulated_components}")
+            return None
+        
+        return sum(quality_scores) / len(quality_scores) if quality_scores else None
 
 
 # Factory function for easy integration

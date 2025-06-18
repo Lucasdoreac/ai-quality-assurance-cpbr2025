@@ -137,7 +137,14 @@ class BulletproofGitHubDocsGenerator:
                         "GitHub Actions documentation generation with quality assurance"
                     )
                 subagetic_result = asyncio.run(run_subagetic())
-                logger.info(f"🤖 Subagetic quality score: {subagetic_result.get('overall_quality', 0.0):.2f}")
+                overall_quality = subagetic_result.get('overall_quality')
+                quality_status = subagetic_result.get('quality_status', 'unknown')
+                
+                if overall_quality is not None:
+                    logger.info(f"🤖 Subagetic quality score: {overall_quality:.2f} (status: {quality_status})")
+                else:
+                    logger.info(f"🤖 Subagetic framework executed (status: {quality_status}) - using simulated components")
+                
                 subagetic_available = True
             except (ImportError, Exception) as e:
                 logger.info(f"Subagetic system not available: {e}")
