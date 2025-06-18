@@ -1,8 +1,7 @@
-name: Deploy GitHub Pages
+name: Deploy GitHub Pages (DISABLED)
 
 on:
-  push:
-    branches: [ enhanced-auto-docs-system, main ]
+  # DISABLED - using deploy-presentation.yml instead
   workflow_dispatch:
 
 permissions:
