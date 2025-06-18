@@ -21,4 +21,4 @@ O sistema inclui uma API REST completa para análise de código.
 
 ---
 
-*Documentação gerada automaticamente em 2025-06-17 22:12:40*
+*Documentação gerada automaticamente em 2025-06-18 00:21:42*

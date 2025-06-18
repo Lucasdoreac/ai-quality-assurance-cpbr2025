@@ -124,7 +124,7 @@ python -m uvicorn src.main:app --reload --port 8000
 
 ## 🤖 Sistema Auto-Documentado
 
-**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-17 22:12:40.
+**Esta documentação foi gerada automaticamente** pelo sistema de auto-documentação em 2025-06-18 00:21:42.
 
 A documentação é atualizada automaticamente sempre que:
 - ✅ Código fonte é modificado
@@ -142,4 +142,4 @@ A documentação é atualizada automaticamente sempre que:
 
 *Desenvolvido com ❤️ por [Aulus Diniz](https://linkedin.com/in/aulus-diniz-9aaab352/) para a comunidade tech brasileira*
 
-*Última atualização automática: 2025-06-17 22:12:40*
+*Última atualização automática: 2025-06-18 00:21:42*
