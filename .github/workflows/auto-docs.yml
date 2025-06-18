@@ -60,18 +60,28 @@ jobs:
       run: |
         echo "🚀 Generating automatic documentation..."
         
+        # Debug Python environment
+        echo "🔍 Python environment debug:"
+        which python3 || echo "python3 not found"
+        python3 --version || echo "python3 version failed"
+        ls -la scripts/simple_doc_generator.py
+        
         # Make script executable
         chmod +x scripts/simple_doc_generator.py
         
         # Run simple documentation generator
-        python scripts/simple_doc_generator.py .
+        echo "📄 Running documentation generator..."
+        python3 scripts/simple_doc_generator.py . 2>&1
+        exit_code=$?
         
-        if [ $? -eq 0 ]; then
+        echo "🔍 Script exit code: $exit_code"
+        
+        if [ $exit_code -eq 0 ]; then
           echo "docs_generated=true" >> $GITHUB_OUTPUT
           echo "✅ Documentation generated successfully"
         else
           echo "docs_generated=false" >> $GITHUB_OUTPUT
-          echo "❌ Documentation generation failed"
+          echo "❌ Documentation generation failed with exit code: $exit_code"
           exit 1
         fi
     
